@@ -42,3 +42,5 @@ jobs:
     - name: Ejecutar pruebas
       run: ./gradlew test
 
+    - name: Ejecutar run (salida consola)
+      run: ./gradlew run

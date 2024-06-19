@@ -1,7 +1,7 @@
 /**
- * Plantilla para pruebas
- * @author Carlos Delgado
- * @version 1.0
+ * Proyecto Final - Programación Funcional
+ * @author: Alexis Solis, Santiago Carrillo, Edwar Forero
+ * Profesor: Carlos A Delgado
  */
 
 package proyecto

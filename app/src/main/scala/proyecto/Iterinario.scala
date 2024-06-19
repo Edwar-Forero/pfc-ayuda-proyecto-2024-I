@@ -1,6 +1,8 @@
-/*
-  @autor: Edwar Forero, Alexis Solis, Santiago Carrillo
-*/
+/**
+ * Proyecto Final - Programación Funcional
+ * @author: Alexis Solis, Santiago Carrillo, Edwar Forero
+ * Profesor: Carlos A Delgado
+ */
 package proyecto
 
 import scala.annotation.tailrec

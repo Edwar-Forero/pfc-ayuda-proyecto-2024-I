@@ -1,8 +1,8 @@
 /**
-  * Taller 3 - Programación Funcional
-  * Autores: <Estudiantes>
-  * Profesor: Carlos A Delgado
-  */
+ * Proyecto Final - Programación Funcional
+ * @author: Alexis Solis, Santiago Carrillo, Edwar Forero
+ * Profesor: Carlos A Delgado
+ */
 package proyecto
 import datos._
 
