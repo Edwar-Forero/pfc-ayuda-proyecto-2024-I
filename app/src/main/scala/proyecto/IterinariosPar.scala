@@ -44,14 +44,19 @@ class ItinerariosPar() {
     (cod1: String, cod2: String) => dfs(cod1, cod2).par.map(_.reverse).toList
   }
 
-  def itinerariosTiempo(vuelos: List[Vuelo], aeropuertos:List[Aeropuerto]): (String, String) => List[Itinerario] = {
+  def itinerariosTiempo(vuelos: List[Vuelo], aeropuertos: List[Aeropuerto]): (String, String) => List[Itinerario] = {
     // Crear un mapa de aeropuertos para búsqueda rápida por código
     val aeropuertoMap: Map[String, Aeropuerto] = aeropuertos.map(a => a.Cod -> a).toMap
+
+    //Función para paralelizar
+    def parallelTiempoTotal (vuelos:List[Itinerario]): List[(Itinerario,Int)] = {
+      for {
+        itinerario <- vuelos
+        tiempoTotal = calcularTiempoTotalItinerario(itinerario)
+      } yield (itinerario, tiempoTotal)
+    }
+
     // Función para calcular el tiempo de vuelo en minutos considerando GMT
-    /*
-      @param vuelo: Vuelo recive un vuelo
-      @return Int Retorna el tiempo de vuelo en minutos
-    */
     def calcularTiempoVuelo(vuelo: Vuelo): Int = {
       val aeropuertoOrigen = aeropuertoMap(vuelo.Org)
       val aeropuertoDestino = aeropuertoMap(vuelo.Dst)
@@ -88,33 +93,33 @@ class ItinerariosPar() {
       @return Int Retorna el tiempo total de un itinerario en minutos
     */
     def calcularTiempoTotalItinerario(itinerario: Itinerario): Int = {
-      val par_Vuelo_Espera = parallel(itinerario.map(calcularTiempoVuelo), itinerario.sliding(2).collect {
+      val tiemposVuelo = itinerario.map(calcularTiempoVuelo)
+      val tiemposEspera = itinerario.sliding(2).collect {
         case List(vuelo1, vuelo2) => calcularTiempoEspera(vuelo1, vuelo2)
-      }.toList)
-      par_Vuelo_Espera._1.sum + par_Vuelo_Espera._2.sum
+      }.toList
+      tiemposVuelo.sum + tiemposEspera.sum
     }
     // Función para obtener todos los itinerarios posibles de cod1 a cod2
     (cod1: String, cod2: String) => {
       val obtenerItinerarios = itinerariosPar(vuelos, aeropuertos)
-      val todosLosItinerarios = obtenerItinerarios(cod1, cod2).par.toList
-      val itinerariosConTiempo = for {
-        itinerario <- todosLosItinerarios.par.toList
-        tiempoTotal = calcularTiempoTotalItinerario(itinerario)
-      } yield (itinerario, tiempoTotal)
+      val todosLosItinerarios = obtenerItinerarios(cod1, cod2)
+      val mitad = todosLosItinerarios.length/2
+      val (primeraMitad, segundaMitad) = todosLosItinerarios.splitAt(mitad)
+      val tiempoParalelizados = parallel(parallelTiempoTotal(primeraMitad), parallelTiempoTotal(segundaMitad))
 
-      val itinerariosOrdenados = itinerariosConTiempo.sortBy(_._2)
+      (tiempoParalelizados._1 ++ tiempoParalelizados._2).sortBy(_._2).take(3).par.map(_._1).toList
+      /*val itinerariosOrdenados = itinerariosConTiempo.sortBy(_._2)
       val mejoresItinerarios = itinerariosOrdenados.take(3).map(_._1)
-      mejoresItinerarios.sortBy(itinerario => calcularTiempoTotalItinerario(itinerario))
+      mejoresItinerarios.sortBy(itinerario => calcularTiempoTotalItinerario(itinerario))*/
     }
   }
 
   def itinerariosEscalasPar(vuelos:List[Vuelo], aeropuertos:List[Aeropuerto]):(String, String)=>List[Itinerario] = {
     def calcularEscalasPar(vuelos:List[Itinerario]):List[(Itinerario, Int)] = {
-      val sumaEscalas = for{
+      for{
         i <- vuelos
         sumas = sumarEscalas(i)
       } yield (i, sumas)
-      sumaEscalas
     }
 
     @tailrec
@@ -185,14 +190,14 @@ class ItinerariosPar() {
 
     //Función que permite la paralelización de los datos
     def calcularLlegadaPar(vuelos:List[Itinerario], code3:Int, code4:Int): List[(Itinerario, Int)] = {
-      val mejoresSalidas = for{
+      for{
         i <- vuelos
         horaPreferida = code3*60 + code4
         horarioLlegada = i.last.HL*60 + i.last.ML
-        if horarioLlegada < horaPreferida
-      } yield (i, i.head.HS*60 + i.head.MS)
-      mejoresSalidas
+        if horarioLlegada <= horaPreferida
+      } yield (i, horaPreferida-(i.last.HL*60 + i.last.ML))
     }
+
     (code1: String, code2:String, code3:Int, code4:Int) => {
       val itinerario = itinerariosPar(vuelos, aeropuertos)
       val itinerarios = itinerario(code1, code2)
@@ -203,5 +208,16 @@ class ItinerariosPar() {
       )
       (mejoresSalidas._1 ++ mejoresSalidas._2).sortBy(_._2).take(1).par.map(_._1).toList
     }
+  }
+}
+
+object prueba{
+  def main(args: Array[String]): Unit = {
+    val itoObj = new ItinerariosPar()
+    val itsCurso40 = itoObj.itinerariosSalidaPar(datos.vuelosC1, datos.aeropuertos)
+    val its7 = itsCurso40("PHX", "DTW",12,5)
+    println(its7)
+    val listassss = List(List(Vuelo("DL", 296, "PHX", 14, 25, "ATL", 19, 53, 0), Vuelo("DL", 714, "ATL", 23, 47, "DTW", 12, 5, 0) ) )
+    println({listassss == its7})
   }
 }

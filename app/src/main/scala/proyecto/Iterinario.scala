@@ -195,14 +195,21 @@ class Itinerario() {
   def itinerariosSalida(vuelos: List[Vuelo], aeropuertos:List[Aeropuerto]): (String, String, Int, Int) => List[Itinerario] = {
     (code1: String, code2:String, code3:Int, code4:Int) => {
       val itinerario = itinerarios(vuelos, aeropuertos)
+
+      /*for (i <- itinerario(code1, code2)){
+        println("HoraEspe: "+ code3 + ":" + code4 + " horarios: "+ i.last.HL+ ":" + i.last.ML)
+        println({{code3+60 + code4} < {i.last.HL*60 + i.last.ML}} + "\n")
+      }*/
+
       val mejoresSalidas = for{
         i <- itinerario(code1, code2)
         horaPreferida = code3*60 + code4
         horarioLlegada = i.last.HL*60 + i.last.ML
-        if horarioLlegada < horaPreferida
-      } yield (i, i.head.HS*60 + i.head.MS)
+        if horarioLlegada <= horaPreferida
+      } yield (i, horaPreferida-(i.last.HL*60 + i.last.ML))
       mejoresSalidas.sortBy(_._2).take(1).map(_._1)
     }
   }
 }
+
 
