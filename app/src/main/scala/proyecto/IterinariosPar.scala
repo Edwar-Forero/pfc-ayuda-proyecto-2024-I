@@ -189,13 +189,13 @@ class ItinerariosPar() {
   def itinerariosSalidaPar(vuelos: List[Vuelo], aeropuertos:List[Aeropuerto]): (String, String, Int, Int) => List[Itinerario] = {
 
     //Función que permite la paralelización de los datos
-    def calcularLlegadaPar(vuelos:List[Itinerario], code3:Int, code4:Int): List[(Itinerario, Int)] = {
+    def calcularLlegadaPar(vuelos:List[Itinerario], code3:Int, code4:Int): List[(Itinerario, Int, Int)] = {
       for{
         i <- vuelos
         horaPreferida = code3*60 + code4
-        horarioLlegada = i.last.HL*60 + i.last.ML
-        if horarioLlegada <= horaPreferida
-      } yield (i, horaPreferida-(i.last.HL*60 + i.last.ML))
+        horaLlegada = i.last.HL*60 + i.last.ML
+        if horaLlegada <= horaPreferida
+      } yield (i, i.head.HS*60 + i.head.MS, horaPreferida-horaLlegada)
     }
 
     (code1: String, code2:String, code3:Int, code4:Int) => {
@@ -206,18 +206,9 @@ class ItinerariosPar() {
       val mejoresSalidas = parallel(calcularLlegadaPar(primeraMitad, code3, code4),
         calcularLlegadaPar(segundaMitad, code3, code4)
       )
-      (mejoresSalidas._1 ++ mejoresSalidas._2).sortBy(_._2).take(1).par.map(_._1).toList
+      //Primero ordenar las mejores salidas por hora de salida más tarde.
+      //Segundo ordena por la menor diferencia entre la hora de llegada y la preferida por la persona
+      (mejoresSalidas._1 ++ mejoresSalidas._2).sortBy(-_._2).sortBy(_._3).take(1).par.map(_._1).toList
     }
-  }
-}
-
-object prueba{
-  def main(args: Array[String]): Unit = {
-    val itoObj = new ItinerariosPar()
-    val itsCurso40 = itoObj.itinerariosSalidaPar(datos.vuelosC1, datos.aeropuertos)
-    val its7 = itsCurso40("PHX", "DTW",12,5)
-    println(its7)
-    val listassss = List(List(Vuelo("DL", 296, "PHX", 14, 25, "ATL", 19, 53, 0), Vuelo("DL", 714, "ATL", 23, 47, "DTW", 12, 5, 0) ) )
-    println({listassss == its7})
   }
 }

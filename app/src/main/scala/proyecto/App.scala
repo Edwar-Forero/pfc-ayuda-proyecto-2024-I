@@ -19,7 +19,7 @@ object App {
     val llegada = "DTW"
     val horaSal = 2
     val minSal = 32
-    val numRepe = 50
+    val numRepe = 30
     bench.itinerarioBench(vuelos, aeropuerto, numRepe)(salida, llegada)
     bench.itinerariosTiempoBench(vuelos, aeropuerto, numRepe)(salida, llegada)
     bench.itinerariosEscalasBench(vuelos, aeropuerto, numRepe)(salida, llegada)
