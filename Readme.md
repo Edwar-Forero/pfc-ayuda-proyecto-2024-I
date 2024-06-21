@@ -7,6 +7,10 @@
 ```
 ## Ejecutar el código
 Ejecute la siguiente clase para observar las comparaciones entre las funciones secuenciales y las
-paralelizadas [App.scala](../pfc-ayuda-proyecto-2024-I/app/src/main/scala/proyecto/App.scala)
+paralelizadas [App.scala](app/src/main/scala/proyecto/App.scala)
 
-También puede ejecutar los test tanto de las funciones secuenciales como de las paralelizadas en: [test.scala](../pfc-ayuda-proyecto-2024-I/app/src/test/scala/proyecto) 
+También puede ejecutar los test tanto de las funciones secuenciales como de las paralelizadas en: [test.scala](app/src/test/scala/proyecto)
+
+## Informe Paralelizacion
+[Informe - Proyecto Funcional](Informe%20-%20Proyecto%20Funcional.pdf)
+
